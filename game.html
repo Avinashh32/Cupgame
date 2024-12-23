@@ -1,0 +1,203 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Find the Ball Game</title>
+  <style>
+    body {
+      margin: 0;
+      padding: 0;
+      background-color: #66cdaa;
+      font-family: Arial, sans-serif;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      height: 100vh;
+      overflow: hidden;
+    }
+
+    h1 {
+      margin: 0;
+      padding: 10px;
+      color: white;
+      text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.5);
+    }
+
+    #game-container {
+      position: relative;
+      width: 800px;
+      height: 400px;
+      background-color: white;
+      border-radius: 10px;
+      box-shadow: 0px 10px 20px rgba(0, 0, 0, 0.5);
+      overflow: hidden;
+    }
+
+    .cup {
+      width: 120px;
+      height: 140px;
+      position: absolute;
+      bottom: 120px;
+      background: url('https://e7.pngegg.com/pngimages/636/530/png-clipart-red-and-white-plastic-cup-united-states-solo-cup-company-plastic-cup-red-solo-cup-red-cup-glass-household.png') no-repeat center;
+      background-size: contain;
+      cursor: pointer;
+      transition: transform 0.3s ease, left 0.5s ease;
+    }
+
+    .ball {
+  width: 40px;
+  height: 40px;
+  background: linear-gradient(135deg, #f2f2f2, #b3b3b3); /* Gradient for a more 3D look */
+  border-radius: 50%;
+  position: absolute;
+  bottom: 120px;
+  left: 50%;
+  transform: translate(-50%, 0);
+  display: none;
+  box-shadow: 0px 5px 20px rgba(0, 0, 0, 0.3), inset 2px 2px 5px rgba(255, 255, 255, 0.5); /* Adding a subtle inner glow and shadow */
+  animation: bounce 0.6s ease-in-out infinite; /* Add a subtle bouncing effect to make it feel more dynamic */
+}
+
+/* Adding a simple bouncing animation */
+@keyframes bounce {
+  0% {
+    transform: translate(-50%, 0);
+  }
+  50% {
+    transform: translate(-50%, -5px); /* The ball goes up a little */
+  }
+  100% {
+    transform: translate(-50%, 0);
+  }
+}
+
+
+    #play-button {
+      margin-top: 20px;
+      padding: 10px 20px;
+      font-size: 18px;
+      background: #ff8800;
+      color: white;
+      border: none;
+      border-radius: 5px;
+      cursor: pointer;
+    }
+
+    #play-button:hover {
+      background: #ff7700;
+    }
+
+    .message {
+      margin-top: 20px;
+      font-size: 20px;
+      font-weight: bold;
+      color: white;
+      text-shadow: 1px 1px 3px rgba(0, 0, 0, 0.5);
+    }
+  </style>
+</head>
+<body>
+  <h1>Find the Ball Game</h1>
+  <div id="game-container">
+    <div class="cup" style="left: 150px;" data-index="0"></div>
+    <div class="cup" style="left: 350px;" data-index="1"></div>
+    <div class="cup" style="left: 550px;" data-index="2"></div>
+    <div class="ball"></div>
+  </div>
+  <button id="play-button">Start Game</button>
+  <div class="message"></div>
+
+  <script>
+    const cups = document.querySelectorAll('.cup');
+    const ball = document.querySelector('.ball');
+    const playButton = document.getElementById('play-button');
+    const message = document.querySelector('.message');
+    let ballPosition = 0;
+    let gameActive = false;
+
+    function resetGame() {
+      ball.style.display = 'none';
+      message.textContent = '';
+      cups.forEach(cup => {
+        cup.style.transform = 'translateY(0)';
+      });
+      ballPosition = Math.floor(Math.random() * 3);
+    }
+
+    function showBall() {
+      ball.style.display = 'block';
+      ball.style.left = `${200 + ballPosition * 200}px`;
+    }
+
+    async function shuffleCups() {
+      const shuffleMoves = 10;
+      const delay = 300;
+
+      for (let i = 0; i < shuffleMoves; i++) {
+        const [index1, index2] = getRandomIndexes();
+        swapCups(index1, index2);
+        await sleep(delay);
+      }
+    }
+
+    function getRandomIndexes() {
+      const indexes = [0, 1, 2];
+      const index1 = indexes.splice(Math.floor(Math.random() * indexes.length), 1)[0];
+      const index2 = indexes[Math.floor(Math.random() * indexes.length)];
+      return [index1, index2];
+    }
+
+    function swapCups(index1, index2) {
+      const cup1 = cups[index1];
+      const cup2 = cups[index2];
+      const cup1Left = cup1.style.left;
+      const cup2Left = cup2.style.left;
+
+      cup1.style.left = cup2Left;
+      cup2.style.left = cup1Left;
+    }
+
+    function sleep(ms) {
+      return new Promise(resolve => setTimeout(resolve, ms));
+    }
+
+    function startGame() {
+      resetGame();
+      showBall();
+      message.textContent = 'Watch the cups shuffle!';
+      gameActive = true;
+
+      setTimeout(async () => {
+        ball.style.display = 'none'; // Hide the ball after showing it
+        await shuffleCups();
+        message.textContent = 'Pick a cup!';
+        cups.forEach(cup => {
+          cup.addEventListener('click', handleCupClick);
+        });
+      }, 2000);
+    }
+
+    function handleCupClick(event) {
+      if (!gameActive) return;
+      const selectedCup = event.currentTarget;
+      const selectedIndex = parseInt(selectedCup.dataset.index, 10);
+
+      if (selectedIndex === ballPosition) {
+        ball.style.display = 'block';
+        message.textContent = 'Congratulations! You found the ball!';
+      } else {
+        message.textContent = 'Sorry, wrong cup. Try again!';
+      }
+
+      gameActive = false;
+      cups.forEach(cup => {
+        cup.removeEventListener('click', handleCupClick);
+      });
+    }
+
+    playButton.addEventListener('click', startGame);
+  </script>
+</body>
+</html>
