@@ -27,8 +27,10 @@
 
     #game-container {
       position: relative;
-      width: 800px;
-      height: 400px;
+      width: 80vw; /* Adjust width to a percentage of viewport width */
+      max-width: 800px; /* Max width for larger screens */
+      height: 40vw; /* Adjust height based on viewport width */
+      max-height: 400px; /* Max height for larger screens */
       background-color: white;
       border-radius: 10px;
       box-shadow: 0px 10px 20px rgba(0, 0, 0, 0.5);
@@ -36,43 +38,48 @@
     }
 
     .cup {
-      width: 120px;
-      height: 140px;
+      width: 20%; /* Set width as a percentage of container width */
+      height: 35%; /* Adjust height to fit within container */
       position: absolute;
-      bottom: 120px;
+      bottom: 30%;
       background: url('https://e7.pngegg.com/pngimages/636/530/png-clipart-red-and-white-plastic-cup-united-states-solo-cup-company-plastic-cup-red-solo-cup-red-cup-glass-household.png') no-repeat center;
       background-size: contain;
       cursor: pointer;
       transition: transform 0.3s ease, left 0.5s ease;
     }
 
+    .cup:nth-child(1) { left: 10%; }
+    .cup:nth-child(2) { left: 40%; }
+    .cup:nth-child(3) { left: 70%; }
+
     .ball {
-  width: 40px;
-  height: 40px;
-  background: linear-gradient(135deg, #f2f2f2, #b3b3b3); /* Gradient for a more 3D look */
-  border-radius: 50%;
-  position: absolute;
-  bottom: 120px;
-  left: 50%;
-  transform: translate(-50%, 0);
-  display: none;
-  box-shadow: 0px 5px 20px rgba(0, 0, 0, 0.3), inset 2px 2px 5px rgba(255, 255, 255, 0.5); /* Adding a subtle inner glow and shadow */
-  animation: bounce 0.6s ease-in-out infinite; /* Add a subtle bouncing effect to make it feel more dynamic */
-}
+      width: 15vw; /* Adjust ball size based on viewport width */
+      height: 15vw; /* Ball height as a percentage of viewport width */
+      max-width: 50px; /* Limit max size */
+      max-height: 50px; /* Limit max size */
+      background: linear-gradient(135deg, #f2f2f2, #b3b3b3); /* Gradient for a more 3D look */
+      border-radius: 50%;
+      position: absolute;
+      bottom: 30%;
+      left: 50%;
+      transform: translate(-50%, 0);
+      display: none;
+      box-shadow: 0px 5px 20px rgba(0, 0, 0, 0.3), inset 2px 2px 5px rgba(255, 255, 255, 0.5); /* Adding a subtle inner glow and shadow */
+      animation: bounce 0.6s ease-in-out infinite; /* Add a subtle bouncing effect to make it feel more dynamic */
+    }
 
-/* Adding a simple bouncing animation */
-@keyframes bounce {
-  0% {
-    transform: translate(-50%, 0);
-  }
-  50% {
-    transform: translate(-50%, -5px); /* The ball goes up a little */
-  }
-  100% {
-    transform: translate(-50%, 0);
-  }
-}
-
+    /* Adding a simple bouncing animation */
+    @keyframes bounce {
+      0% {
+        transform: translate(-50%, 0);
+      }
+      50% {
+        transform: translate(-50%, -5px); /* The ball goes up a little */
+      }
+      100% {
+        transform: translate(-50%, 0);
+      }
+    }
 
     #play-button {
       margin-top: 20px;
@@ -101,9 +108,9 @@
 <body>
   <h1>Find the Ball Game</h1>
   <div id="game-container">
-    <div class="cup" style="left: 150px;" data-index="0"></div>
-    <div class="cup" style="left: 350px;" data-index="1"></div>
-    <div class="cup" style="left: 550px;" data-index="2"></div>
+    <div class="cup" style="left: 10%;" data-index="0"></div>
+    <div class="cup" style="left: 40%;" data-index="1"></div>
+    <div class="cup" style="left: 70%;" data-index="2"></div>
     <div class="ball"></div>
   </div>
   <button id="play-button">Start Game</button>
@@ -128,7 +135,7 @@
 
     function showBall() {
       ball.style.display = 'block';
-      ball.style.left = `${200 + ballPosition * 200}px`;
+      ball.style.left = `${10 + ballPosition * 30}%`;
     }
 
     async function shuffleCups() {
