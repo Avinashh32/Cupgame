@@ -41,7 +41,7 @@
       width: 20%; /* Set width as a percentage of container width */
       height: 35%; /* Adjust height to fit within container */
       position: absolute;
-      bottom: 30%;
+      bottom: 20%; /* Adjust the cups' position to allow space for the ball */
       background: url('https://i.ibb.co/jR2KLpt/cup.png') no-repeat center;
       background-size: contain;
       cursor: pointer;
@@ -53,16 +53,16 @@
     .cup:nth-child(3) { left: 70%; }
 
     .ball {
-      width: 15vw; /* Adjust ball size based on viewport width */
-      height: 15vw; /* Ball height as a percentage of viewport width */
+      width: 12vw; /* Adjust ball size based on viewport width */
+      height: 12vw; /* Ball height as a percentage of viewport width */
       max-width: 50px; /* Limit max size */
       max-height: 50px; /* Limit max size */
       background: linear-gradient(135deg, #f2f2f2, #b3b3b3); /* Gradient for a more 3D look */
       border-radius: 50%;
       position: absolute;
-      bottom: 30%;
+      bottom: 15%; /* Place ball above the cups */
       left: 50%;
-      transform: translate(-50%, 0);
+      transform: translateX(-50%);
       display: none;
       box-shadow: 0px 5px 20px rgba(0, 0, 0, 0.3), inset 2px 2px 5px rgba(255, 255, 255, 0.5); /* Adding a subtle inner glow and shadow */
       animation: bounce 0.6s ease-in-out infinite; /* Add a subtle bouncing effect to make it feel more dynamic */
@@ -71,13 +71,13 @@
     /* Adding a simple bouncing animation */
     @keyframes bounce {
       0% {
-        transform: translate(-50%, 0);
+        transform: translateX(-50%) translateY(0);
       }
       50% {
-        transform: translate(-50%, -5px); /* The ball goes up a little */
+        transform: translateX(-50%) translateY(-5px); /* The ball goes up a little */
       }
       100% {
-        transform: translate(-50%, 0);
+        transform: translateX(-50%) translateY(0);
       }
     }
 
@@ -103,6 +103,26 @@
       color: white;
       text-shadow: 1px 1px 3px rgba(0, 0, 0, 0.5);
     }
+
+    /* Add media queries to adjust ball size for different devices */
+    @media (max-width: 600px) {
+      .ball {
+        width: 18vw;
+        height: 18vw;
+        max-width: 40px;
+        max-height: 40px;
+      }
+    }
+
+    @media (max-width: 400px) {
+      .ball {
+        width: 22vw;
+        height: 22vw;
+        max-width: 35px;
+        max-height: 35px;
+      }
+    }
+
   </style>
 </head>
 <body>
