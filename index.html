@@ -27,10 +27,10 @@
 
     #game-container {
       position: relative;
-      width: 80vw; /* Adjust width to a percentage of viewport width */
-      max-width: 800px; /* Max width for larger screens */
-      height: 40vw; /* Adjust height based on viewport width */
-      max-height: 400px; /* Max height for larger screens */
+      width: 80vw;
+      max-width: 800px;
+      height: 40vw;
+      max-height: 400px;
       background-color: white;
       border-radius: 10px;
       box-shadow: 0px 10px 20px rgba(0, 0, 0, 0.5);
@@ -38,10 +38,10 @@
     }
 
     .cup {
-      width: 20%; /* Set width as a percentage of container width */
-      height: 35%; /* Adjust height to fit within container */
+      width: 20%;
+      height: 35%;
       position: absolute;
-      bottom: 20%; /* Adjust the cups' position to allow space for the ball */
+      bottom: 20%;
       background: url('https://i.ibb.co/jR2KLpt/cup.png') no-repeat center;
       background-size: contain;
       cursor: pointer;
@@ -53,32 +53,25 @@
     .cup:nth-child(3) { left: 70%; }
 
     .ball {
-      width: 12vw; /* Adjust ball size based on viewport width */
-      height: 12vw; /* Ball height as a percentage of viewport width */
-      max-width: 50px; /* Limit max size */
-      max-height: 50px; /* Limit max size */
-      background: linear-gradient(135deg, #f2f2f2, #b3b3b3); /* Gradient for a more 3D look */
+      width: 12vw;
+      height: 12vw;
+      max-width: 50px;
+      max-height: 50px;
+      background: linear-gradient(135deg, #f2f2f2, #b3b3b3);
       border-radius: 50%;
       position: absolute;
-      bottom: 15%; /* Place ball above the cups */
+      bottom: 15%;
       left: 50%;
       transform: translateX(-50%);
       display: none;
-      box-shadow: 0px 5px 20px rgba(0, 0, 0, 0.3), inset 2px 2px 5px rgba(255, 255, 255, 0.5); /* Adding a subtle inner glow and shadow */
-      animation: bounce 0.6s ease-in-out infinite; /* Add a subtle bouncing effect to make it feel more dynamic */
+      box-shadow: 0px 5px 20px rgba(0, 0, 0, 0.3), inset 2px 2px 5px rgba(255, 255, 255, 0.5);
+      animation: bounce 0.6s ease-in-out infinite;
     }
 
-    /* Adding a simple bouncing animation */
     @keyframes bounce {
-      0% {
-        transform: translateX(-50%) translateY(0);
-      }
-      50% {
-        transform: translateX(-50%) translateY(-5px); /* The ball goes up a little */
-      }
-      100% {
-        transform: translateX(-50%) translateY(0);
-      }
+      0% { transform: translateX(-50%) translateY(0); }
+      50% { transform: translateX(-50%) translateY(-5px); }
+      100% { transform: translateX(-50%) translateY(0); }
     }
 
     #play-button {
@@ -104,23 +97,60 @@
       text-shadow: 1px 1px 3px rgba(0, 0, 0, 0.5);
     }
 
-    /* Add media queries to adjust ball size for different devices */
-    @media (max-width: 600px) {
-      .ball {
-        width: 18vw;
-        height: 18vw;
-        max-width: 40px;
-        max-height: 40px;
-      }
+    /* Modal styles */
+    .modal {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background-color: rgba(0, 0, 0, 0.5);
+      z-index: 1000;
     }
 
-    @media (max-width: 400px) {
-      .ball {
-        width: 22vw;
-        height: 22vw;
-        max-width: 35px;
-        max-height: 35px;
-      }
+    .modal-content {
+      background-color: white;
+      padding: 20px;
+      border-radius: 8px;
+      text-align: center;
+      position: relative;
+      width: 80%;
+      max-width: 400px;
+    }
+
+    .modal input {
+      padding: 10px;
+      margin: 10px 0;
+      font-size: 16px;
+      width: 100%;
+      border-radius: 5px;
+      border: 1px solid #ccc;
+    }
+
+    .modal button {
+      padding: 10px 20px;
+      background-color: #ff8800;
+      color: white;
+      border: none;
+      border-radius: 5px;
+      cursor: pointer;
+    }
+
+    .modal button:hover {
+      background-color: #ff7700;
+    }
+
+    .close-btn {
+      position: absolute;
+      top: 5px;
+      right: 5px;
+      font-size: 20px;
+      color: #333;
+      cursor: pointer;
     }
 
   </style>
@@ -133,16 +163,53 @@
     <div class="cup" style="left: 70%;" data-index="2"></div>
     <div class="ball"></div>
   </div>
-  <button id="play-button">Start Game</button>
+  <button id="play-button" style="display: none;">Start Game</button>
   <div class="message"></div>
+
+  <!-- Modal for Name Input -->
+  <div id="name-modal" class="modal">
+    <div class="modal-content">
+      <span class="close-btn" onclick="closeModal()">&times;</span>
+      <h2>Enter Your Name</h2>
+      <input type="text" id="player-name" placeholder="Enter your name">
+      <button onclick="startGame()">Start Game</button>
+    </div>
+  </div>
 
   <script>
     const cups = document.querySelectorAll('.cup');
     const ball = document.querySelector('.ball');
     const playButton = document.getElementById('play-button');
     const message = document.querySelector('.message');
+    const modal = document.getElementById('name-modal');
+    const playerNameInput = document.getElementById('player-name');
     let ballPosition = 0;
     let gameActive = false;
+    let playerName = '';
+
+    // Function to open the modal and prompt for player's name
+    function openModal() {
+      modal.style.display = 'flex';
+    }
+
+    // Function to close the modal
+    function closeModal() {
+      modal.style.display = 'none';
+      startGame();
+    }
+
+    // Handle starting the game after the player enters their name
+    function startGame() {
+      if (playerNameInput.value.trim() !== '') {
+        playerName = playerNameInput.value;
+        message.textContent = `Welcome, ${playerName}! Click Start to play the game.`;
+      } else {
+        playerName = 'Player';
+      }
+
+      modal.style.display = 'none'; // Close modal
+      playButton.style.display = 'block'; // Show play button
+    }
 
     function resetGame() {
       ball.style.display = 'none';
@@ -190,7 +257,7 @@
       return new Promise(resolve => setTimeout(resolve, ms));
     }
 
-    function startGame() {
+    function playGame() {
       resetGame();
       showBall();
       message.textContent = 'Watch the cups shuffle!';
@@ -224,7 +291,10 @@
       });
     }
 
-    playButton.addEventListener('click', startGame);
+    playButton.addEventListener('click', playGame);
+
+    // Open modal when page loads to ask for name
+    openModal();
   </script>
 </body>
 </html>
