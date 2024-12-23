@@ -35,6 +35,7 @@
       border-radius: 10px;
       box-shadow: 0px 10px 20px rgba(0, 0, 0, 0.5);
       overflow: hidden;
+      margin-right: 30px;
     }
 
     .cup {
@@ -153,6 +154,28 @@
       cursor: pointer;
     }
 
+    /* Scoreboard Section */
+    #scoreboard {
+      display: flex;
+      flex-direction: column;
+      justify-content: flex-start;
+      position: absolute;
+      top: 0;
+      right: 20px;
+      background-color: white;
+      padding: 20px;
+      border-radius: 10px;
+      box-shadow: 0px 5px 15px rgba(0, 0, 0, 0.3);
+      color: #333;
+      font-size: 18px;
+    }
+
+    #scoreboard h2 {
+      margin-top: 0;
+      font-size: 24px;
+      color: #ff8800;
+    }
+
   </style>
 </head>
 <body>
@@ -176,6 +199,13 @@
     </div>
   </div>
 
+  <!-- Scoreboard Section -->
+  <div id="scoreboard">
+    <h2>Highest Score</h2>
+    <p id="highest-score-name">Name: N/A</p>
+    <p id="highest-score-points">Score: 0</p>
+  </div>
+
   <script>
     const cups = document.querySelectorAll('.cup');
     const ball = document.querySelector('.ball');
@@ -183,9 +213,13 @@
     const message = document.querySelector('.message');
     const modal = document.getElementById('name-modal');
     const playerNameInput = document.getElementById('player-name');
+    const highestScoreName = document.getElementById('highest-score-name');
+    const highestScorePoints = document.getElementById('highest-score-points');
     let ballPosition = 0;
     let gameActive = false;
     let playerName = '';
+    let currentScore = 0;
+    let highestScore = { name: '', points: 0 };
 
     // Function to open the modal and prompt for player's name
     function openModal() {
@@ -212,85 +246,95 @@
     }
 
     function resetGame() {
-      ball.style.display = 'none';
-      message.textContent = '';
-      cups.forEach(cup => {
-        cup.style.transform = 'translateY(0)';
-      });
-      ballPosition = Math.floor(Math.random() * 3);
-    }
+  ball.style.display = 'none';
+  message.textContent = '';
+  cups.forEach(cup => {
+    cup.style.transform = 'translateY(0)';
+  });
+  ballPosition = Math.floor(Math.random() * 3); // Reset ball position randomly
+  currentScore = 0; // Reset current score
+}
 
-    function showBall() {
-      ball.style.display = 'block';
-      ball.style.left = `${10 + ballPosition * 30}%`;
-    }
+function showBall() {
+  ball.style.display = 'block';
+  ball.style.left = `${10 + ballPosition * 30}%`; // Place ball under the correct cup
+}
 
-    async function shuffleCups() {
-      const shuffleMoves = 10;
-      const delay = 300;
+async function shuffleCups() {
+  const shuffleMoves = 10;
+  const delay = 300;
 
-      for (let i = 0; i < shuffleMoves; i++) {
-        const [index1, index2] = getRandomIndexes();
-        swapCups(index1, index2);
-        await sleep(delay);
-      }
-    }
+  for (let i = 0; i < shuffleMoves; i++) {
+    const [index1, index2] = getRandomIndexes();
+    swapCups(index1, index2);
+    await sleep(delay);
+  }
+}
 
-    function getRandomIndexes() {
-      const indexes = [0, 1, 2];
-      const index1 = indexes.splice(Math.floor(Math.random() * indexes.length), 1)[0];
-      const index2 = indexes[Math.floor(Math.random() * indexes.length)];
-      return [index1, index2];
-    }
+function getRandomIndexes() {
+  const indexes = [0, 1, 2];
+  const index1 = indexes.splice(Math.floor(Math.random() * indexes.length), 1)[0];
+  const index2 = indexes[Math.floor(Math.random() * indexes.length)];
+  return [index1, index2];
+}
 
-    function swapCups(index1, index2) {
-      const cup1 = cups[index1];
-      const cup2 = cups[index2];
-      const cup1Left = cup1.style.left;
-      const cup2Left = cup2.style.left;
+function swapCups(index1, index2) {
+  const cup1 = cups[index1];
+  const cup2 = cups[index2];
+  const cup1Left = cup1.style.left;
+  const cup2Left = cup2.style.left;
 
-      cup1.style.left = cup2Left;
-      cup2.style.left = cup1Left;
-    }
+  cup1.style.left = cup2Left;
+  cup2.style.left = cup1Left;
+}
 
-    function sleep(ms) {
-      return new Promise(resolve => setTimeout(resolve, ms));
-    }
+function sleep(ms) {
+  return new Promise(resolve => setTimeout(resolve, ms));
+}
 
-    function playGame() {
-      resetGame();
-      showBall();
-      message.textContent = 'Watch the cups shuffle!';
-      gameActive = true;
+function playGame() {
+  resetGame();
+  showBall(); // Show ball under the correct cup initially
+  message.textContent = 'Watch the cups shuffle!';
+  gameActive = true;
 
-      setTimeout(async () => {
-        ball.style.display = 'none'; // Hide the ball after showing it
-        await shuffleCups();
-        message.textContent = 'Pick a cup!';
-        cups.forEach(cup => {
-          cup.addEventListener('click', handleCupClick);
-        });
-      }, 2000);
-    }
+  setTimeout(async () => {
+    ball.style.display = 'none'; // Hide the ball after a short delay to allow shuffling
+    await shuffleCups();
+    message.textContent = 'Pick a cup!';
+    cups.forEach(cup => {
+      cup.addEventListener('click', handleCupClick);
+    });
+  }, 2000); // Give 2 seconds before hiding the ball and shuffling
+}
 
-    function handleCupClick(event) {
-      if (!gameActive) return;
-      const selectedCup = event.currentTarget;
-      const selectedIndex = parseInt(selectedCup.dataset.index, 10);
+function handleCupClick(event) {
+  if (!gameActive) return;
+  const selectedCup = event.currentTarget;
+  const selectedIndex = parseInt(selectedCup.dataset.index, 10);
 
-      if (selectedIndex === ballPosition) {
-        ball.style.display = 'block';
-        message.textContent = 'Congratulations! You found the ball!';
-      } else {
-        message.textContent = 'Sorry, wrong cup. Try again!';
-      }
+  if (selectedIndex === ballPosition) {
+    message.textContent = 'Congratulations! You found the ball!';
+    ball.style.left = `${10 + ballPosition * 30}%`; // Show the ball under the correct cup
+    ball.style.display = 'block'; // Ensure ball is visible
+    currentScore++; // Increment score for correct choice
+  } else {
+    message.textContent = 'Sorry, wrong cup. Try again!';
+    ball.style.display = 'none'; // Hide ball if wrong choice
+  }
 
-      gameActive = false;
-      cups.forEach(cup => {
-        cup.removeEventListener('click', handleCupClick);
-      });
-    }
+  gameActive = false; // End the game
+  cups.forEach(cup => {
+    cup.removeEventListener('click', handleCupClick);
+  });
 
+  // Update highest score if necessary
+  if (currentScore > highestScore.points) {
+    highestScore = { name: playerName, points: currentScore };
+    highestScoreName.textContent = `Name: ${highestScore.name}`;
+    highestScorePoints.textContent = `Score: ${highestScore.points}`;
+  }
+}
     playButton.addEventListener('click', playGame);
 
     // Open modal when page loads to ask for name
