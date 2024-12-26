@@ -4,13 +4,14 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Find the Ball Game</title>
-  <!-- Firebase UMD Compat versions -->
+  <link rel="stylesheet" href="styles.css">
   <script src="https://www.gstatic.com/firebasejs/9.17.2/firebase-app-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/9.17.2/firebase-database-compat.js"></script>
-  <link rel="stylesheet" href="styles.css">
 </head>
 <body>
   <h1>Find the Ball Game</h1>
+
+  <!-- Game Container -->
   <div id="game-container">
     <div class="cup" style="left: 10%;" data-index="0"></div>
     <div class="cup" style="left: 40%;" data-index="1"></div>
@@ -20,7 +21,7 @@
   <button id="play-button" style="display: none;">Start Game</button>
   <div class="message"></div>
 
-  <!-- Modal for Name Input -->
+  <!-- Modal for Player Name -->
   <div id="name-modal" class="modal">
     <div class="modal-content">
       <span class="close-btn" onclick="closeModal()">&times;</span>
@@ -30,19 +31,22 @@
     </div>
   </div>
 
-  <!-- Scoreboard Section -->
+  <!-- Scoreboard -->
   <div id="scoreboard">
     <h2>Highest Score</h2>
     <p id="highest-score-name">Name: N/A</p>
     <p id="highest-score-points">Score: 0</p>
   </div>
 
+  <!-- Chat Section -->
   <div id="chat-container">
-    <div id="chat-box">
-      <!-- Messages will appear here -->
+    <div id="chat-header">
+      <span>Chat</span>
+      <button id="toggle-chat-button">-</button>
     </div>
+    <div id="chat-box"></div>
     <div id="chat-input-container">
-      <input type="text" id="chat-input" placeholder="Type a message..." />
+      <input type="text" id="chat-input" placeholder="Type a message...">
       <button id="send-button">Send</button>
     </div>
   </div>
