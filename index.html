@@ -1,6 +1,11 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
+<!-- Firebase UMD Compat versions -->
+<script src="https://www.gstatic.com/firebasejs/9.17.2/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.17.2/firebase-database-compat.js"></script>
+
+
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Find the Ball Game</title>
@@ -205,8 +210,68 @@
     <p id="highest-score-name">Name: N/A</p>
     <p id="highest-score-points">Score: 0</p>
   </div>
+  <div id="chat-container">
+    <div id="chat-box">
+      <!-- Messages will appear here -->
+    </div>
+    <div id="chat-input-container">
+      <input type="text" id="chat-input" placeholder="Type a message..." />
+      <button id="send-button">Send</button>
+    </div>
+  </div>
+  
+  <style>
+    #chat-container {
+    position: fixed;
+    bottom: 0;
+    right: 0;
+    width: 300px;
+    background-color: white;
+    border: 1px solid #ccc;
+    border-radius: 10px 10px 0 0;
+    box-shadow: 0px -2px 5px rgba(0, 0, 0, 0.2);
+    overflow: hidden;
+    display: flex;
+    flex-direction: column;
+  }
+
+  #chat-box {
+    flex: 1;
+    padding: 10px;
+    overflow-y: auto;
+    max-height: 200px;
+    font-size: 18px;
+    word-wrap: break-word;
+  }
+
+  #chat-input-container {
+    display: flex;
+    border-top: 1px solid #ccc;
+  }
+
+  #chat-input {
+    flex: 1;
+    padding: 10px;
+    border: none;
+    outline: none;
+  }
+
+  #send-button {
+    background-color: #66cdaa;
+    color: white;
+    border: none;
+    padding: 5px 10px;
+    cursor: pointer;
+  }
+
+  #send-button:hover {
+    background-color: #55b099;
+  }
+  </style>
+  
 
   <script>
+    
     const cups = document.querySelectorAll('.cup');
     const ball = document.querySelector('.ball');
     const playButton = document.getElementById('play-button');
@@ -261,7 +326,7 @@ function showBall() {
 }
 
 async function shuffleCups() {
-  const shuffleMoves = 8;
+  const shuffleMoves = 4;
   const delay = 300;
 
   for (let i = 0; i < shuffleMoves; i++) {
@@ -339,6 +404,49 @@ function handleCupClick(event) {
 
     // Open modal when page loads to ask for name
     openModal();
+    const firebaseConfig = {
+    apiKey: "AIzaSyB6DgiYDaHagdEgY0A8Rr0-Lz_d70A0IGQ",
+    authDomain: "avinashcupgames.firebaseapp.com",
+    databaseURL: "https://avinashcupgames-default-rtdb.firebaseio.com",
+    projectId: "avinashcupgames",
+    storageBucket: "avinashcupgames.firebasestorage.app",
+    messagingSenderId: "616363874329",
+    appId: "1:616363874329:web:f7f67c31c36cccf222f288"
+  };
+
+  // Initialize Firebase
+  firebase.initializeApp(firebaseConfig);
+  const database = firebase.database();
+
+
+//Add Chat Function
+const chatRef = database.ref('chat'); // Create a "chat" node in the database
+const chatBox = document.getElementById('chat-box');
+const chatInput = document.getElementById('chat-input');
+const sendButton = document.getElementById('send-button');
+
+// Function to send a message
+sendButton.addEventListener('click', () => {
+  const message = chatInput.value.trim();
+  if (message) {
+    chatRef.push({
+      name: playerName || 'Anonymous', // Use player's name or "Anonymous"
+      message: message,
+      timestamp: Date.now(),
+    });
+    chatInput.value = ''; // Clear the input
+  }
+});
+
+// Listen for new messages and display them
+chatRef.on('child_added', (snapshot) => {
+  const data = snapshot.val();
+  const messageElement = document.createElement('div');
+  messageElement.innerHTML = `<strong>${data.name}:</strong> ${data.message}`;
+  chatBox.appendChild(messageElement);
+  chatBox.scrollTop = chatBox.scrollHeight; // Scroll to the bottom
+});
+
   </script>
 </body>
 </html>
