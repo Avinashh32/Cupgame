@@ -102,15 +102,7 @@ function resetCups() {
 }
 
 // Show ball under the correct cup
-function showBall() {
-    ball.style.display = 'block';
-    const cupWidth = cups[0].offsetWidth;
-    const containerLeft = cups[0].parentElement.getBoundingClientRect().left;
-    const ballLeft = containerLeft + (cupWidth * ballPosition) + (cupWidth - ball.offsetWidth) / 2;
-    ball.style.left = `${ballLeft}px`;
-    ball.style.zIndex = '10';
-    ball.style.opacity = '1';
-}
+
 
 // Shuffle cups
 function getRandomIndexes() {
@@ -188,6 +180,23 @@ function disableCupClicks() {
 }
 
 // Handle cup click
+function showBall() {
+    ball.style.display = 'block';
+    const cup = cups[ballPosition];
+    const cupRect = cup.getBoundingClientRect();
+    const containerRect = cup.parentElement.getBoundingClientRect();
+
+    // Position the ball to align with the selected cup
+    const ballLeft = cupRect.left + cupRect.width / 2 - ball.offsetWidth / 2 - containerRect.left;
+    const ballTop = cupRect.top + cupRect.height / 2 - ball.offsetHeight / 2 - containerRect.top;
+
+    ball.style.left = `${ballLeft}px`;
+    ball.style.top = `${ballTop}px`;
+
+    // Drop ball animation
+    ball.style.animation = 'dropIntoCup 0.6s ease-in-out';
+}
+
 function handleCupClick(event) {
     if (!gameActive) return;
 
@@ -197,38 +206,43 @@ function handleCupClick(event) {
     gameActive = false;
     disableCupClicks();
 
-    // Reveal all cups
-    cups.forEach(cup => {
-        cup.style.transform = 'translateY(-50px)';
-    });
+    // Highlight the selected cup and make it "bounce"
+    selectedCup.classList.add('clicked');
 
-    // Show the ball immediately
+    // Reveal the ball
     showBall();
 
-    // Check if the selected cup matches the ball's position
-    if (selectedIndex === ballPosition) {
-        currentScore++;
-        message.textContent = `Correct! Your score: ${currentScore}`;
-        updateHighScore();
-        setTimeout(() => {
-            updatePlayButton('continue');
-        }, 1500);
-    } else {
-        isGameOver = true;
-        message.textContent = `Game Over! Final Score: ${currentScore}`;
-        updateHighScore();
-        setTimeout(() => {
-            updatePlayButton('restart');
-        }, 1500);
-    }
+    // Check if the player's choice was correct
+    setTimeout(() => {
+        if (selectedIndex === ballPosition) {
+            currentScore++;
+            message.textContent = `Correct! Your score: ${currentScore}`;
+            updateHighScore();
+            setTimeout(() => {
+                updatePlayButton('continue');
+            }, 1000);
+        } else {
+            isGameOver = true;
+            message.textContent = `Game Over! Final Score: ${currentScore}`;
+            updateHighScore();
+            setTimeout(() => {
+                updatePlayButton('restart');
+            }, 1000);
+        }
+
+        // Reset cup animations
+        cups.forEach(cup => cup.classList.remove('clicked'));
+    }, 1000);
+}
+
 
     // Keep the ball visible after result
     setTimeout(() => {
         cups.forEach(cup => {
             cup.style.transform = 'translateY(0)';
         });
-    }, 2000);
-}
+    }, 1000);
+
 
 
 // Play button update
@@ -271,6 +285,26 @@ function startGame() {
     updatePlayButton('start');
 }
 
+// Offensive words list
+const offensiveWords = [
+    "sethxakka", "muji", "seth", // Custom offensive words
+    "damn", "hell", "idiot", "stupid", // Add English offensive words
+    "crap", "fool", "jerk", "moron", "dumb", // Expand as needed
+    "ass", "bitch", "shit", "fuck", "bastard" // Include harsher terms
+];
+
+// Filter function
+function filterOffensiveWords(message) {
+    let filteredMessage = message.toLowerCase();
+
+    offensiveWords.forEach(word => {
+        const regex = new RegExp(`\\b${word}\\b`, 'gi');
+        filteredMessage = filteredMessage.replace(regex, "*".repeat(word.length));
+    });
+
+    return filteredMessage;
+}
+
 // Chat Functionality
 sendButton.addEventListener('click', sendMessage);
 
@@ -283,16 +317,20 @@ chatInput.addEventListener('keypress', (event) => {
 function sendMessage() {
     const chatMessage = chatInput.value.trim();
     if (chatMessage) {
-        database.ref('chat').push({
+        // Filter the message for offensive words
+        const filteredMessage = filterOffensiveWords(chatMessage);
+
+        const messageData = {
             name: playerName || 'Anonymous',
-            message: chatMessage,
+            message: filteredMessage,
             timestamp: Date.now(),
-        });
+        };
+
+        // Send message to Firebase
+        database.ref('chat').push(messageData);
         chatInput.value = '';
     }
 }
-
-
 
 database.ref('chat').on('child_added', (snapshot) => {
     const data = snapshot.val();
@@ -303,10 +341,62 @@ database.ref('chat').on('child_added', (snapshot) => {
 });
 
 // Minimize chat
-toggleChatButton.addEventListener('click', () => {
-    chatContainer.classList.toggle('minimized');
-    toggleChatButton.textContent = chatContainer.classList.contains('minimized') ? '+' : '-';
-});
+document.addEventListener('DOMContentLoaded', () => {
+    // Get or create necessary elements
+    const chatContainer = document.getElementById('chat-container');
+    const chatHeader = document.getElementById('chat-header');
+    
+    // Make sure header has the text and button
+    if (!chatHeader.querySelector('span')) {
+      const headerText = document.createElement('span');
+      headerText.textContent = 'Chat';
+      chatHeader.insertBefore(headerText, chatHeader.firstChild);
+    }
+    
+    if (!chatHeader.querySelector('#minimize-btn')) {
+      const minimizeBtn = document.createElement('button');
+      minimizeBtn.id = 'minimize-btn';
+      minimizeBtn.setAttribute('aria-label', 'Minimize chat');
+      chatHeader.appendChild(minimizeBtn);
+    }
+  
+    // Toggle minimize function
+    function toggleMinimize(event) {
+      event.stopPropagation();
+      chatContainer.classList.toggle('minimized');
+    }
+  
+    // Add click listeners
+    chatHeader.addEventListener('click', toggleMinimize);
+  });
+
+//code for prevent DOS Attack//
+const MESSAGE_COOLDOWN = 2000; // 5 seconds cooldown
+let lastMessageTime = 0;
+
+function sendMessage() {
+    const currentTime = Date.now();
+    if (currentTime - lastMessageTime < MESSAGE_COOLDOWN) {
+        alert("Please wait a few seconds before sending another message.");
+        return;
+    }
+
+    const chatMessage = chatInput.value.trim();
+    if (chatMessage) {
+        const filteredMessage = filterOffensiveWords(chatMessage);
+
+        const messageData = {
+            name: playerName || 'Anonymous',
+            message: filteredMessage,
+            timestamp: Date.now(),
+        };
+
+        // Send message to Firebase
+        database.ref('chat').push(messageData);
+        chatInput.value = '';
+        lastMessageTime = currentTime;
+    }
+}
 
 // Initialize game
 loadHighScore();
