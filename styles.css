@@ -2,7 +2,7 @@
 :root {
   --primary: #d1d1d1;
   --primary-dark: #2563eb;
-  --background: linear-gradient(65deg, #005A83 20%, #036595 20%, #0571A4 40%, #005A83 40%);
+  --background: linear-gradient(65deg, #c6d0d47c 20%, #45a3cf 20%, #796f93ec 40%, #0e6486 30%);
   --text: #1f2937;
   --white: #ffffff;
   --shadow-sm: 0 4px 6px rgba(0, 0, 0, 0.05);
